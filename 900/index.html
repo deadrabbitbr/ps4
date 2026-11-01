@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <link rel="icon" type="image/png" href="../deadavatar.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERMANOVICZ // HOST PS4 9.00-9.60</title>
+    <style>
+        :root {
+            --bg: #151515;
+            --panel: #1c1c1c;
+            --panel-2: #242424;
+            --line: #2e2e2e;
+            --line-bright: #454545;
+            --text: #f5f5f5;
+            --muted: #b5b5b5;
+            --dim: #828282;
+            --accent: #ff9494;
+            --red: #ff9b9b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { background: #000000; }
+        html, body { min-height: 100%; }
+        body {
+            background: linear-gradient(135deg, #3b0000 0%, #000000 100%) no-repeat fixed;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            font: 17px/1.4 Consolas, "Liberation Mono", monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        a { color: inherit; }
+
+        .app { display: flex; flex: 1 0 auto; flex-direction: column; margin: 0 auto; padding: 14px 26px 12px; width: min(100% - 52px, 1220px); }
+
+        /* Top status bar */
+        .bar {
+            align-items: center;
+            border: 1px solid var(--line-bright);
+            display: flex;
+            font-size: 14px;
+            justify-content: space-between;
+            letter-spacing: .1em;
+            padding: 10px 16px;
+            text-transform: uppercase;
+        }
+        .bar b { color: var(--accent); font-weight: 400; }
+        .bar-fw { color: var(--dim); }
+        .bar-fw::before { color: var(--accent); content: "\25CF "; }
+
+        .layout { display: flex; flex: 1 0 auto; flex-direction: column; padding: 20px 0 0; }
+
+        /* Header */
+        .kicker { color: var(--accent); font-size: 14px; letter-spacing: .14em; margin: 0 0 12px; }
+        h1 { font-size: clamp(34px, 5vw, 56px); font-weight: 400; letter-spacing: -.07em; line-height: 1; margin: 0; }
+        h1 em { color: var(--accent); font-style: normal; }
+        .sub { color: var(--muted); font-size: 17px; margin: 13px 0 0; max-width: 720px; }
+        .boot { color: var(--dim); font-size: 14px; list-style: none; margin: 12px 0 0; }
+        .boot li { margin: 3px 0; }
+        .boot b { color: var(--accent); font-weight: 400; }
+        .fw-display { border-left: 2px solid var(--accent); color: var(--text); display: inline-block; font-size: 15px; margin-top: 12px; padding: 5px 10px; }
+
+        /* Status */
+        .status {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            margin-top: 20px;
+            padding: 14px 16px;
+        }
+        /* loader.js toggles these two classes on #notify - keep both defined */
+        .notification, .notification2 {
+            background: var(--panel-2);
+            border: 1px solid var(--line-bright);
+            color: var(--text);
+            min-height: 42px;
+            padding: 10px 14px;
+        }
+        #log { color: var(--text); font-size: 16px; line-height: 1.45; }
+        #log h1 { color: var(--text) !important; font-size: 16px; font-weight: 400; line-height: 1.45; margin: 0; }
+        #console { display: none !important; }
+        .jailbreak-status {
+            border-left: 2px solid var(--accent);
+            color: var(--accent);
+            font-size: 17px;
+            margin-top: 10px;
+            padding: 4px 10px;
+        }
+        .status-meta {
+            align-items: center;
+            border-top: 1px solid var(--line);
+            color: var(--dim);
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 14px;
+            gap: 10px 16px;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+        .status-pass { color: var(--accent); }
+        .status-fail { color: var(--red); }
+
+        /* Controls */
+        .controls { border: 1px solid var(--line); margin-top: 14px; padding: 14px; }
+        .section-title {
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 14px;
+            letter-spacing: .12em;
+            margin-bottom: 11px;
+            padding: 0 4px 10px;
+            text-transform: uppercase;
+        }
+        .grid { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .grid button {
+            background: var(--panel);
+            border: 1px solid var(--line-bright);
+            color: var(--text);
+            cursor: pointer;
+            font: inherit;
+            min-height: 48px;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .grid button:hover, .grid button:focus {
+            background: var(--panel-2);
+            border-color: var(--accent);
+            color: var(--accent);
+            outline: 0;
+        }
+        .grid button:focus { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+
+
+
+        @media (max-width: 820px) {
+            body { overflow: auto; }
+            .app { padding: 8px 10px; width: min(100% - 20px, 560px); }
+            .bar { font-size: 12px; padding: 8px 12px; }
+            .layout { padding-top: 14px; }
+            h1 { font-size: 38px; }
+            .sub { font-size: 16px; }
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 430px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 34px; }
+        }
+    </style>
+    <script>
+        if (window.applicationCache.status == '0') {
+            window.location.replace("version-selector.html");
+        }
+    </script>
+    <script defer src="payloads.js"></script>
+    <script defer src="loader.js"></script>
+    <script type="module" src="alert.js"></script>
+</head>
+
+<body onload="if (window.ps4FirmwareSupported) load_exploit();">
+    <div class="app">
+        <header class="bar">
+            <span><b>SERMANOVICZ</b> // hosts ps4</span>
+            <span class="bar-fw">fw 9.00-9.60 pronto</span>
+        </header>
+        <main class="layout">
+            <p class="kicker">$ ./launch --psfree-9xx</p>
+            <h1>Host PSFree <em>9.00-9.60</em></h1>
+            <p class="sub">Auto GoldHEN Lapse online e offline por SERMANOVICZ.</p>
+            <ul class="boot">
+                <li>[ <b>ok</b> ] cadeia psfree 1.7 pronta</li>
+                <li>[ <b>ok</b> ] goldhen v2.4b18.12 preparado</li>
+                <li>[ <b>ok</b> ] cache offline pronto</li>
+            </ul>
+            <p class="fw-display">FW - <span id="PS4fw"></span></p>
+
+            <div class="status">
+                <div id="notify" class="notification"><div id="log"></div></div>
+                <pre id="console" style="display:none" aria-hidden="true"></pre>
+                <div class="jailbreak-status" id="msgs2">Pronto para Jailbreak</div>
+                <div class="status-meta">
+                    <span class="status-pass">Tentativas com sucesso: <span id="passCounter">0</span></span>
+                    <span class="status-fail">Tentativas sem sucesso: <span id="failCounter">0</span></span>
+                </div>
+            </div>
+
+            <section class="controls">
+                <div class="section-title">Payloads</div>
+                <div class="grid">
+                    <button onclick="load_PSFreeFix()" onMouseOver="document.getElementById('msgs2').innerHTML='Correção PSFree - Corrige problemas do exploit PSFree no PS4'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Correção PSFree</button>
+                    <button onclick="load_ftp()" onMouseOver="document.getElementById('msgs2').innerHTML='Servidor FTP - Inicia servidor FTP para acesso a arquivos'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Servidor FTP</button>
+                    <button onclick="load_ps4debug()" onMouseOver="document.getElementById('msgs2').innerHTML='PS4Debug - Habilita recursos de depuração'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">PS4Debug</button>
+                    <button onclick="load_app2usb()" onMouseOver="document.getElementById('msgs2').innerHTML='App2USB - Transfere aplicativos para armazenamento USB'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">App2USB</button>
+                    <button onclick="load_backup()" onMouseOver="document.getElementById('msgs2').innerHTML='Backup - Faz backup dos dados do sistema para USB'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Backup</button>
+                    <button onclick="load_restore()" onMouseOver="document.getElementById('msgs2').innerHTML='Restaurar - Restaura dados do sistema a partir do USB'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Restaurar</button>
+                    <button onclick="load_disable_updates()" onMouseOver="document.getElementById('msgs2').innerHTML='Desativar Atualizações - Bloqueia atualizações do sistema'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Desativar Atualizações</button>
+                    <button onclick="load_enable_updates()" onMouseOver="document.getElementById('msgs2').innerHTML='Ativar Atualizações - Permite atualizações do sistema'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Ativar Atualizações</button>
+                    <button onclick="load_appcache_install()" onMouseOver="document.getElementById('msgs2').innerHTML='Instalar AppCache - Instala cache de aplicativo'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Instalar AppCache</button>
+                    <button onclick="load_history_blocker()" onMouseOver="document.getElementById('msgs2').innerHTML='Bloqueador de Histórico - Bloqueia rastreamento do histórico do navegador'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Bloqueador de Histórico</button>
+                    <button onclick="load_pup_decrypt()" onMouseOver="document.getElementById('msgs2').innerHTML='Descriptografar PUP - Descriptografa arquivos de atualização do PS4'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Descriptografar PUP</button>
+                    <button onclick="load_rif_renamer()" onMouseOver="document.getElementById('msgs2').innerHTML='Renomeador RIF - Gerencia arquivos de licença'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">Renomeador RIF</button>
+                    <button onclick="load_webrte()" onMouseOver="document.getElementById('msgs2').innerHTML='WebRTE - Recursos de edição em tempo real'" onmouseout="document.getElementById('msgs2').innerHTML='Pronto para Jailbreak'">WebRTE</button>
+                </div>
+            </section>
+
+
+        </main>
+    </div>
+
+    <script>
+        // Detecção de Firmware
+        UA = navigator.userAgent.substring(navigator.userAgent.indexOf("6.72 (") + 28, navigator.userAgent.indexOf(") Apple"));
+        // 9.xx
+        if (UA == "layStation 4/9.00") UA = "9.00";
+        if (UA == "layStation 4/9.03") UA = "9.03";
+        if (UA == "layStation 4/9.04") UA = "9.04";
+        if (UA == "layStation 4/9.50") UA = "9.50";
+        if (UA == "layStation 4/9.51") UA = "9.51";
+        if (UA == "layStation 4/9.60") UA = "9.60";
+        if (UA == "layStation 4/99.99") UA = "99.99";
+        var supportedFW = ["9.00", "9.03", "9.04", "9.50", "9.51", "9.60", "99.99"];
+        window.ps4FirmwareSupported = supportedFW.indexOf(UA) !== -1;
+        if (!window.ps4FirmwareSupported) alert("Este host é apenas para PS4 FW 9.xx!");
+        document.getElementById("PS4fw").innerHTML = "" + UA + "";
+        // Inicialização de estatísticas
+        if (localStorage.passcount == null || localStorage.passcount == undefined) localStorage.passcount = 0;
+        if (localStorage.failcount == null || localStorage.failcount == undefined) localStorage.failcount = 0;
+        // Atualiza contadores ao carregar a página
+        if (document.getElementById("passCounter")) document.getElementById("passCounter").innerHTML = localStorage.passcount;
+        if (document.getElementById("failCounter")) document.getElementById("failCounter").innerHTML = localStorage.failcount;
+    </script>
+
+
+</body>
+
+</html>

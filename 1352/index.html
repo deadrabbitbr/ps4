@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR" manifest="cache.manifest">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SERMANOVICZ // HOST PS4 13.02-13.52 / GOLDHEN</title>
+<link rel="icon" type="image/png" href="../deadavatar.png">
+<style>
+    :root {
+        --bg: #151515;
+        --panel: #1c1c1c;
+        --panel-2: #242424;
+        --line: #2e2e2e;
+        --line-bright: #454545;
+        --text: #f5f5f5;
+        --muted: #b5b5b5;
+        --dim: #828282;
+        --accent: #ff9494;
+        --red: #ff9b9b;
+        --amber: #e1bd72;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #000000; }
+    html, body { min-height: 100%; }
+    body {
+        background: linear-gradient(135deg, #3b0000 0%, #000000 100%) no-repeat fixed;
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        font: 17px/1.4 Consolas, "Liberation Mono", monospace;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    a { color: inherit; }
+
+    .app { display: flex; flex: 1 0 auto; flex-direction: column; margin: 0 auto; padding: 14px 26px 12px; width: min(100% - 52px, 1220px); }
+
+    /* Barra de status superior */
+    .bar {
+        align-items: center;
+        border: 1px solid var(--line-bright);
+        display: flex;
+        font-size: 14px;
+        justify-content: space-between;
+        letter-spacing: .1em;
+        padding: 10px 16px;
+        text-transform: uppercase;
+    }
+    .bar b { color: var(--accent); font-weight: 400; }
+    .bar-fw { color: var(--dim); }
+    .bar-fw::before { color: var(--accent); content: "\25CF "; }
+
+    .layout { display: flex; flex: 1 0 auto; flex-direction: column; padding: 20px 0 0; }
+
+    /* Cabeçalho */
+    .kicker { color: var(--accent); font-size: 14px; letter-spacing: .14em; margin: 0 0 12px; }
+    h1 { font-size: clamp(34px, 5vw, 56px); font-weight: 400; letter-spacing: -.07em; line-height: 1; margin: 0; }
+    h1 em { color: var(--accent); font-style: normal; }
+    .sub { color: var(--muted); font-size: 17px; margin: 13px 0 0; max-width: 720px; }
+    .boot { color: var(--dim); font-size: 14px; list-style: none; margin: 12px 0 0; }
+    .boot li { margin: 3px 0; }
+    .boot b { color: var(--accent); font-weight: 400; }
+
+    /* Status do roteador */
+    .status {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        margin-top: 20px;
+        padding: 14px 16px;
+    }
+    #state { color: var(--accent); font-size: 22px; font-weight: 400; line-height: 1.25; margin: 0 0 10px; }
+    #det { color: var(--muted); font-size: 14px; margin: 0 0 6px; }
+    #det b { color: var(--text); font-weight: 400; }
+    #cache { color: var(--dim); font-size: 13px; margin: 0 0 10px; min-height: 16px; }
+    #cache.cacheok { color: var(--accent); }
+    .ok { color: var(--accent); }
+    .bad { color: var(--red); }
+    .warn { color: var(--amber); }
+
+
+
+    @media (max-width: 760px) {
+        body { overflow: auto; }
+        .app { padding: 8px 10px; width: min(100% - 20px, 560px); }
+        .bar { font-size: 12px; padding: 8px 12px; }
+        .layout { padding-top: 14px; }
+        h1 { font-size: 38px; }
+        .sub { font-size: 16px; }
+        #state { font-size: 19px; }
+    }
+</style>
+</head>
+<body>
+    <div class="app">
+        <header class="bar">
+            <span><b>SERMANOVICZ</b> // hosts ps4</span>
+            <span class="bar-fw">fw 13.02-13.52 pronto</span>
+        </header>
+
+        <main class="layout">
+            <p class="kicker">$ ./iniciar --slopkit relapse</p>
+            <h1>Host SlopKit <em>13.02-13.52</em></h1>
+            <p class="sub">Host de pesquisa WebKit por SERMANOVICZ.</p>
+            <ul class="boot">
+                <li>[ <b>ok</b> ] cadeia slopkit pronta</li>
+                <li>[ <b>ok</b> ] goldhen v2.4b18.12 preparado</li>
+                <li>[ <b>ok</b> ] cache offline pronto</li>
+            </ul>
+
+            <section class="status" id="wrap">
+                <div id="state">detectando firmware...</div>
+                <div id="det"></div>
+                <div id="cache"></div>
+            </section>
+
+
+        </main>
+    </div>
+
+<script>
+(function () {
+    var stateEl = document.getElementById("state");
+    var detEl = document.getElementById("det");
+    var cacheEl = document.getElementById("cache");
+    var launched = false;
+    var cacheFinished = false;
+    var cacheWatchdog = null;
+
+    function setState(text, cssClass) {
+        stateEl.textContent = text;
+        stateEl.className = cssClass || "";
+    }
+    function setCache(text, ok) {
+        cacheEl.textContent = text;
+        cacheEl.className = ok ? "cacheok" : "";
+    }
+    function queryValue(name) {
+        var match = new RegExp("[?&]" + name + "=([^&]*)").exec(location.search);
+        if (!match) return null;
+        try { return decodeURIComponent(match[1]); } catch (error) { return null; }
+    }
+    function sessionGet(name) {
+        try { return sessionStorage.getItem(name); } catch (error) { return null; }
+    }
+    function sessionSet(name, value) {
+        try {
+            sessionStorage.setItem(name, String(value));
+            return sessionStorage.getItem(name) === String(value);
+        } catch (error) { return false; }
+    }
+    function sessionRemove(name) {
+        try { sessionStorage.removeItem(name); } catch (error) {}
+    }
+
+    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1 };
+    var key = null;
+    var fwnum = null;
+    var match = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
+    if (match) {
+        var minor = parseInt(match[2], 16);
+        var minorString = minor.toString(16);
+        if (minorString.length < 2) minorString = "0" + minorString;
+        key = match[1] + "." + minorString;
+        fwnum = parseInt(match[1], 10) * 100 + parseInt(minorString, 10);
+    }
+
+    var forced = queryValue("force") === "1";
+    var supported = fwnum !== null && SUPPORTED[fwnum] === 1;
+    detEl.innerHTML = "firmware <b>" + (key || "desconhecido") + "</b>"
+        + " &middot; <b>" + (supported ? "suportado" : "não suportado") + "</b>";
+
+    var target = "jb.html" + location.search;
+    if (location.search.indexOf("log=") === -1)
+        target += (location.search ? "&" : "?") + "log=1";
+
+    var preflightKey = "pspulse-1352-preflight:" + target;
+    var cacheReloadKey = "pspulse-1352-cache-reload";
+
+    function go() {
+        if (launched) return;
+        launched = true;
+
+        if (sessionGet(preflightKey) !== "yes") {
+            if (!sessionSet(preflightKey, "yes")) {
+                setState("ARMAZENAMENTO DE SESSÃO INDISPONÍVEL — pressione X para continuar", "warn");
+                waitForTap("ARMAZENAMENTO DE SESSÃO INDISPONÍVEL — pressione X para continuar", function () {
+                    location.replace(target);
+                });
+                return;
+            }
+            setState("preparando estado de memória limpo...", "warn");
+            setTimeout(function () { location.reload(); }, 750);
+            return;
+        }
+
+        setState("carregando jailbreak...", "warn");
+        location.replace(target);
+    }
+
+    function waitForTap(message, action) {
+        setState(message, "warn");
+        var fired = false;
+        function cleanup() {
+            window.removeEventListener("click", click, false);
+            window.removeEventListener("keydown", keydown, false);
+        }
+        function fire() {
+            if (fired) return;
+            fired = true;
+            cleanup();
+            action();
+        }
+        function click() { fire(); }
+        function keydown(event) {
+            var code = event.which || event.keyCode || 0;
+            var keyName = event.key || event.keyIdentifier || "";
+            if (code === 13 || code === 32 || keyName === "Enter" ||
+                keyName === " " || keyName === "Spacebar") {
+                event.preventDefault();
+                fire();
+            }
+        }
+        window.addEventListener("click", click, false);
+        window.addEventListener("keydown", keydown, false);
+    }
+
+    if (!supported && !forced) {
+        setState("FIRMWARE NÃO SUPORTADO — execução interrompida", "bad");
+        setCache("Este host suporta apenas PS4 13.02, 13.04, 13.50 e 13.52.");
+        return;
+    }
+
+    function finishCache() {
+        if (cacheFinished) return false;
+        cacheFinished = true;
+        if (cacheWatchdog !== null) {
+            clearTimeout(cacheWatchdog);
+            cacheWatchdog = null;
+        }
+        return true;
+    }
+
+    function reloadWithFreshCache(swap) {
+        if (!finishCache()) return;
+        if (swap) {
+            try { applicationCache.swapCache(); } catch (error) {}
+        }
+        sessionSet(preflightKey, "yes");
+        if (sessionGet(cacheReloadKey) === "yes") {
+            sessionRemove(cacheReloadKey);
+            go();
+            return;
+        }
+        sessionSet(cacheReloadKey, "yes");
+        setCache("cache pronto — recarregando uma vez", true);
+        setTimeout(function () { location.reload(); }, 750);
+    }
+
+    var ac = window.applicationCache;
+    if (!ac || !document.documentElement.hasAttribute("manifest")) {
+        setCache("cache de aplicativo indisponível");
+        go();
+        return;
+    }
+
+    ac.addEventListener("downloading", function () {
+        setCache("salvando em cache para uso offline...");
+    }, false);
+    ac.addEventListener("progress", function (event) {
+        if (event && event.total > 0)
+            setCache("salvando em cache " + Math.round(event.loaded / event.total * 100) + "%");
+    }, false);
+    ac.addEventListener("cached", function () {
+        reloadWithFreshCache(false);
+    }, false);
+    ac.addEventListener("updateready", function () {
+        reloadWithFreshCache(true);
+    }, false);
+    ac.addEventListener("noupdate", function () {
+        if (!finishCache()) return;
+        sessionRemove(cacheReloadKey);
+        setCache("em cache — pronto para offline", true);
+        go();
+    }, false);
+    ac.addEventListener("error", function () {
+        if (!finishCache()) return;
+        sessionRemove(cacheReloadKey);
+        setCache("cache indisponível");
+        waitForTap("FALHA NO CACHE — pressione X ou toque para executar online", go);
+    }, false);
+    ac.addEventListener("obsolete", function () {
+        if (!finishCache()) return;
+        sessionRemove(cacheReloadKey);
+        setCache("cache obsoleto — limpe os dados do navegador", false);
+        setState("CACHE OBSOLETO — limpe os dados do navegador e reabra o host", "bad");
+    }, false);
+
+    if (!navigator.onLine) {
+        finishCache();
+        setCache("offline — usando arquivos em cache", true);
+        go();
+    } else if (ac.status === ac.UPDATEREADY) {
+        reloadWithFreshCache(true);
+    } else if (ac.status === ac.CHECKING || ac.status === ac.DOWNLOADING ||
+               ac.status === ac.UNCACHED) {
+        setCache("aguardando cache offline...");
+        cacheWatchdog = setTimeout(function () {
+            if (!finishCache()) return;
+            setCache("tempo limite para verificação do cache esgotado");
+            waitForTap("TEMPO LIMITE DO CACHE — pressione X ou toque para executar online", go);
+        }, 60000);
+    } else {
+        setCache("em cache — verificando atualizações...");
+        try { ac.update(); } catch (error) {}
+        cacheWatchdog = setTimeout(function () {
+            if (!finishCache()) return;
+            sessionRemove(cacheReloadKey);
+            setCache("em cache — pronto para offline", true);
+            go();
+        }, 5000);
+    }
+}());
+</script>
+
+
+</body>
+</html>
