@@ -1,0 +1,14 @@
+CACHE MANIFEST
+# version-label-audit-20261021-v3
+# navigation-v1-20261021: apenas menu; os caches dos hosts sao instalados separadamente
+
+CACHE:
+./
+index.html
+deadavatar.png
+700/version-selector.html
+900/version-selector.html
+css/version-selector.html
+
+NETWORK:
+*

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR" manifest="navigation.manifest">
+<head>
+    <link rel="icon" type="image/png" href="deadavatar.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERMANOVICZ // HOSTS PS4</title>
+    <style>
+        :root {
+            --bg: #151515;
+            --panel: #1c1c1c;
+            --panel-2: #242424;
+            --line: #2e2e2e;
+            --line-bright: #454545;
+            --text: #f5f5f5;
+            --muted: #b5b5b5;
+            --dim: #828282;
+            --accent: #ff9494;
+            --accent-dim: #a86363;
+        }
+
+        * { box-sizing: border-box; }
+        html { background: #000000; }
+        html, body { margin: 0; min-height: 100%; }
+        body {
+            background: linear-gradient(135deg, #3b0000 0%, #000000 100%) no-repeat fixed;
+            color: var(--text);
+            font: 17px/1.4 Consolas, "Liberation Mono", monospace;
+        }
+        a { color: inherit; }
+
+        .app { display: flex; flex-direction: column; margin: 0 auto; max-width: 1220px; min-height: 100vh; padding: 14px 26px 12px; }
+
+        /* Barra de status superior */
+        .bar {
+            align-items: center;
+            border: 1px solid var(--line-bright);
+            display: flex;
+            font-size: 14px;
+            justify-content: space-between;
+            letter-spacing: .1em;
+            padding: 10px 16px;
+            text-transform: uppercase;
+        }
+        .bar b { color: var(--accent); font-weight: 400; }
+        .bar-ready { color: var(--dim); }
+        .bar-ready::before { color: var(--accent); content: "\25CF "; }
+
+        .layout { display: flex; flex: 1 0 auto; flex-direction: column; padding: 22px 0 0; }
+
+        /* Cabeçalho */
+        .kicker { color: var(--accent); font-size: 14px; letter-spacing: .14em; margin: 0 0 12px; }
+        h1 { font-size: clamp(38px, 5.4vw, 62px); font-weight: 400; letter-spacing: -.07em; line-height: 1; margin: 0; }
+        h1 em { color: var(--accent); font-style: normal; }
+        .sub { color: var(--muted); font-size: 18px; margin: 14px 0 0; max-width: 720px; }
+        .boot { color: var(--dim); font-size: 14px; list-style: none; margin: 14px 0 0; padding: 0; }
+        .boot li { margin: 3px 0; }
+        .boot b { color: var(--accent); font-weight: 400; }
+
+        /* Menu */
+        .menu { border: 1px solid var(--line); margin-top: 22px; padding: 14px; }
+        .menu-top {
+            align-items: baseline;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 11px;
+            padding: 0 4px 10px;
+        }
+        .menu-title { color: var(--text); font-size: 15px; letter-spacing: .12em; text-transform: uppercase; }
+        .menu-hint { color: var(--dim); font-size: 13px; }
+        .grid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+        .row {
+            align-items: center;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            display: flex;
+            min-height: 74px;
+            padding: 12px 14px;
+            text-decoration: none;
+        }
+        .row:hover, .row:focus {
+            background: var(--panel-2);
+            border-color: var(--accent);
+            outline: 0;
+        }
+        .row:focus { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+        .num { color: var(--dim); font-size: 14px; min-width: 42px; }
+        .row:hover .num, .row:focus .num { color: var(--accent); }
+        .name { color: var(--text); display: block; font-size: 20px; line-height: 1.2; }
+        .meta { color: var(--muted); display: block; font-size: 13px; margin-top: 4px; }
+        .go { color: var(--dim); font-size: 13px; margin-left: auto; opacity: 0; padding-left: 12px; white-space: nowrap; }
+        .row:hover .go, .row:focus .go { opacity: 1; color: var(--accent); }
+
+
+
+        @media (max-width: 760px) {
+            body { font-size: 16px; }
+            .app { padding: 8px 10px; }
+            .bar { font-size: 12px; padding: 8px 12px; }
+            .layout { padding-top: 16px; }
+            h1 { font-size: 40px; }
+            .sub { font-size: 16px; }
+            .grid { grid-template-columns: 1fr; }
+            .row { min-height: 64px; }
+            .menu-hint { display: none; }
+            .np-name { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="bar">
+            <span><b>SERMANOVICZ</b> // hosts ps4</span>
+            <span class="bar-ready">pronto</span>
+        </header>
+
+        <main class="layout">
+            <p class="kicker">$ ./iniciar --selecionar-host</p>
+            <h1>Escolha o <em>firmware</em></h1>
+            <p class="sub">Escolha o host correspondente ao firmware instalado no seu PlayStation 4.</p>
+            <ul class="boot">
+                <li>[ <b>ok</b> ] 7 rotas de host detectadas</li>
+                <li id="navigation-cache-status">[ <b>...</b> ] verificando cache do menu offline</li>
+            </ul>
+
+            <section class="menu" aria-label="Menu de hosts de firmware">
+                <div class="menu-top">
+                    <span class="menu-title">Rotas disponíveis</span>
+                    <span class="menu-hint">&uarr; &darr; mover &nbsp; X selecionar</span>
+                </div>
+                <nav class="grid">
+                    <a class="row" href="1352/index.html">
+                        <span class="num">01</span>
+                        <span><span class="name">FW 13.02–13.52</span><span class="meta">SlopKit GoldHEN // host offline</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="1300/index.html">
+                        <span class="num">02</span>
+                        <span><span class="name">FW 11.00–12.02 / 12.50–13.00</span><span class="meta">SlopKit WebKit // versão atual</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="css/version-selector.html">
+                        <span class="num">03</span>
+                        <span><span class="name">FW 6.00–11.02</span><span class="meta">CSSFontFace // host GoldHEN</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="900/version-selector.html">
+                        <span class="num">04</span>
+                        <span><span class="name">FW 9.00–9.60</span><span class="meta">PSFree / Lapse // host GoldHEN</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="700/version-selector.html">
+                        <span class="num">05</span>
+                        <span><span class="name">FW 7.00–8.52</span><span class="meta">PSFree / Lapse // host GoldHEN</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="672/index.html">
+                        <span class="num">06</span>
+                        <span><span class="name">FW 6.72</span><span class="meta">Host dedicado // payloads utilitários</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                    <a class="row" href="505/index.html">
+                        <span class="num">07</span>
+                        <span><span class="name">FW 5.05</span><span class="meta">Host dedicado // payloads utilitários</span></span>
+                        <span class="go">[ SELECIONAR ]</span>
+                    </a>
+                </nav>
+            </section>
+
+
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            // Não intercepte as teclas de seta: o navegador do PS4 move seu cursor
+            // de foco visível nativamente. Isso apenas posiciona o foco inicial
+            // para que o cursor fique visível logo após o carregamento.
+            var first = document.querySelector('.row');
+            if (first) first.focus();
+        })();
+    </script>
+
+
+
+    <script>
+        (function () {
+            var label = document.getElementById('navigation-cache-status');
+            var cache = window.applicationCache;
+            function show(message) { label.textContent = message; }
+            if (!cache) { show('[ -- ] cache do menu offline indisponível'); return; }
+            function ready() { show('[ ok ] menu em cache; abra um host online para salvar seus recursos'); }
+            cache.addEventListener('checking', function () { show('[ ... ] verificando cache do menu offline'); }, false);
+            cache.addEventListener('downloading', function () { show('[ ... ] baixando cache do menu offline'); }, false);
+            cache.addEventListener('cached', ready, false);
+            cache.addEventListener('noupdate', ready, false);
+            cache.addEventListener('updateready', function () {
+                try { cache.swapCache(); } catch (error) {}
+                show('[ ok ] cache do menu atualizado; reabra esta página para usar');
+            }, false);
+            cache.addEventListener('error', function () {
+                if (cache.status === cache.IDLE || cache.status === cache.UPDATEREADY) {
+                    show('[ ok ] menu salvo disponível; atualização não pôde ser verificada');
+                } else { show('[ ! ] falha na instalação do cache do menu'); }
+            }, false);
+            cache.addEventListener('obsolete', function () { show('[ ! ] cache do menu removido; reconecte para reinstalar'); }, false);
+            if (cache.status === cache.IDLE) ready();
+            else if (cache.status === cache.UPDATEREADY) show('[ ok ] atualização do menu disponível; reabra esta página');
+        }());
+    </script>
+</body>
+</html>
