@@ -1,0 +1,33 @@
+CACHE MANIFEST
+# resource-path-fix-20261021-main-v2
+# offline-manifests-v1-20261021
+# v2.1 - liberacao de estado de payload 20261003
+# PS4 5.05 FW GoldHEN Host
+
+CACHE:
+goldhen10.bin
+# Arquivos principais
+index.html
+exploit.js
+../deadavatar.png
+
+# Payloads GoldHEN
+goldhen.bin
+
+# Payloads utilitários
+Kernel-Clock.bin
+app2usb.bin
+appcache-install.bin
+backup.bin
+disable-updates.bin
+enable-updates.bin
+ftp.bin
+history-blocker.bin
+ps4debug.bin
+pup-decrypt.bin
+restore.bin
+rif-renamer.bin
+
+
+NETWORK:
+*
